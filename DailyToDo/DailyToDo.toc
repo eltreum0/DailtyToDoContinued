@@ -1,0 +1,9 @@
+## Interface: 90100
+## Title: DailyToDo Continued
+## Version: 1.0.7
+## Notes: Create Daily and Weekly ToDo lists!
+## Author: Eltreum, orginally Ærixalimar
+## SavedVariables: DailyToDoDB
+
+embeds.xml
+DailyToDo.lua
