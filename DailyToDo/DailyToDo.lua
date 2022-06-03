@@ -191,8 +191,11 @@ end
 -- Called when the addon is enabled
 function DailyToDo:OnEnable()
 
-   self.ShowObjectivesWindow = ObjectiveTrackerFrame.Show
-   ObjectiveTrackerFrame.Show = self.ObjectiveTrackerFrameShow
+	--check if its retail or classic
+   if select(4,GetBuildInfo()) > 90000 then
+	self.ShowObjectivesWindow = ObjectiveTrackerFrame.Show
+	ObjectiveTrackerFrame.Show = self.ObjectiveTrackerFrameShow
+   end
    
    self:CheckCurrentDateAndTime(true)
    
