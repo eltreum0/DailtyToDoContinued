@@ -781,7 +781,7 @@ function DailyToDo:CreateManagerFrame()
    self.checklistManagerFrame.name = "DailyToDo"
    self.checklistManagerFrame:SetAllPoints(InterfaceOptionsFramePanelContainer)
    self.checklistManagerFrame:Hide()
-   InterfaceOptions_AddCategory(self.checklistManagerFrame)
+   InterfaceOptions_AddCategory(self.checklistManagerFrame) --check back for dragonflight
    
    -- Create addon profiles options frame
    self.checklistProfilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)

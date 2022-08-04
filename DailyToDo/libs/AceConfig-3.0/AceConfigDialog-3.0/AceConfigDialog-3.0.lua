@@ -2007,7 +2007,7 @@ function AceConfigDialog:AddToBlizOptions(appName, name, parent, ...)
 		end
 		group:SetCallback("OnShow", FeedToBlizPanel)
 		group:SetCallback("OnHide", ClearBlizPanel)
-		InterfaceOptions_AddCategory(group.frame)
+		InterfaceOptions_AddCategory(group.frame)  --check back for dragonflight
 		return group.frame
 	else
 		error(("%s has already been added to the Blizzard Options Window with the given path"):format(appName), 2)
