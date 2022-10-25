@@ -1207,7 +1207,7 @@ function DailyToDo:CreateManagerFrame()
 
 	-- Add checklist title
 	local checklistManagerTitle = self.checklistManagerFrame:CreateFontString("ManagerTitleText", nil, "GameFontNormalLarge")
-	checklistManagerTitle:SetText("|cffFFB90FDaily Checklist Manager	-|r")
+	checklistManagerTitle:SetText("|cffFFB90FDaily Checklist Manager|r")
 	checklistManagerTitle:SetPoint("TOPLEFT", self.checklistManagerFrame, "TOPLEFT", 10, -255)
 	checklistManagerTitle:Show()
 
