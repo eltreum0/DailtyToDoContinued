@@ -46,51 +46,53 @@ DailyToDo.ShowObjectivesWindow = nil
 
 -- Create our minimap icon
 DailyToDo.DailyToDoLDB = LibStub("LibDataBroker-1.1"):NewDataObject("DailyToDoDO", {
-										 type = "data source",
-										 text = "DailyToDo",
-										 icon = "Interface\\RAIDFRAME\\ReadyCheck-Ready.blp",
-										 OnTooltipShow = function(tt)
-										    tt:AddLine("DailyToDo Continued")
-											tt:AddLine(" ")
-										    tt:AddLine("Left Click to toggle frame")
-										    tt:AddLine("Right Click to open options, or type /todo")
-										 end,
-										 OnClick = function(self, button) DailyToDo:HandleIconClick(button) end,
-									     })
+	type = "data source",
+	text = "DailyToDo",
+	icon = "Interface\\RAIDFRAME\\ReadyCheck-Ready.blp",
+	OnTooltipShow = function(tt)
+		tt:AddLine("DailyToDo Continued")
+		tt:AddLine(" ")
+		tt:AddLine("Left Click to toggle frame")
+		tt:AddLine("Right Click to open options, or type /todo")
+	end,
+	OnClick = function(self, button) 
+		DailyToDo:HandleIconClick(button) 
+	end,
+	})
 DailyToDo.icon = LibStub("LibDBIcon-1.0")
 LibDBIcon = LibStub("LibDBIcon-1.0")
 
 
 -- Set our database default values
 DailyToDo.defaults = {
-   profile = {
-      version = "1.0",
-      icon = {
-	 hide = false,
-      },
-      framePosition = {
-	 x = 0,
-	 y = 0,
-	 anchor = "CENTER",
-	 hidden = false,
-      },
-      locked = false,
-      hideObjectives = false,
-      showListHeaders = true,
-      hideCompleted = false,
-      timestamp = nil,
-      dailyResetTime = 1,
-      weeklyResetDay = 3,
-      resetPollInterval = 5,
-      lists = {
-	 [1] = {
-	    name = "Default",
-	    expanded = true,
-	    entries = {
-	    },
-	 }
-      },
-   },
+	profile = {
+		version = "1.0",
+		icon = {
+			hide = false,
+		},
+		framePosition = {
+			x = 0,
+			y = 0,
+			anchor = "CENTER",
+			hidden = false,
+		},
+		locked = false,
+		hideObjectives = false,
+		showListHeaders = true,
+		hideCompleted = false,
+		timestamp = nil,
+		dailyResetTime = 1,
+		weeklyResetDay = 3,
+		resetPollInterval = 5,
+		lists = {
+			[1] = {
+				name = "Default",
+				expanded = true,
+				entries = {
+				},
+			}
+		},
+	},
 }
 
 -- Initialize addon, called directly after the addon is fully loaded
@@ -191,11 +193,8 @@ end
 -- Called when the addon is enabled
 function DailyToDo:OnEnable()
 
-	--check if its retail or classic
-   if select(4,GetBuildInfo()) > 90000 then
-	self.ShowObjectivesWindow = ObjectiveTrackerFrame.Show
-	ObjectiveTrackerFrame.Show = self.ObjectiveTrackerFrameShow
-   end
+   --self.ShowObjectivesWindow = ObjectiveTrackerFrame.Show
+   --ObjectiveTrackerFrame.Show = self.ObjectiveTrackerFrameShow
    
    self:CheckCurrentDateAndTime(true)
    
@@ -781,7 +780,7 @@ function DailyToDo:CreateManagerFrame()
    self.checklistManagerFrame.name = "DailyToDo"
    self.checklistManagerFrame:SetAllPoints(InterfaceOptionsFramePanelContainer)
    self.checklistManagerFrame:Hide()
-   InterfaceOptions_AddCategory(self.checklistManagerFrame) --check back for dragonflight
+   InterfaceOptions_AddCategory(self.checklistManagerFrame)
    
    -- Create addon profiles options frame
    self.checklistProfilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
