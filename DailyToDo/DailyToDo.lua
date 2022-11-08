@@ -192,6 +192,12 @@ function DailyToDo:HandleChatMessageCommands(msg)
 		self:Print("\"/todo options\" : opens options dialog")
 		self:Print("\"/todo profiles\" : opens profiles dialog")
 		self:Print("\"/todo manager\" : opens manager dialog")
+	elseif command == "reset" then
+		self:ResetTimer()
+		self.db.profile.timestamp = nil
+		self:CheckCurrentDateAndTime(true, true)
+		self:RefreshEverything()
+		self:Print('Entries Reset')
 	else
 		self:Print("Usage: \"/todo <command> <identifier>\"")
 		self:Print("Type: \"/todo help\" for a list of commands")
@@ -204,7 +210,7 @@ function DailyToDo:OnEnable()
 	--self.ShowObjectivesWindow = ObjectiveTrackerFrame.Show
 	--ObjectiveTrackerFrame.Show = self.ObjectiveTrackerFrameShow
 
-	self:CheckCurrentDateAndTime(true)
+	self:CheckCurrentDateAndTime(true, false)
 
 	self:ResetTimer()
 
@@ -239,7 +245,7 @@ end
 
 -- Updates checklist entries based on new time and/or day
 function DailyToDo:UpdateForNewDateAndTime()
-	if DailyToDo:CheckCurrentDateAndTime(false) then
+	if DailyToDo:CheckCurrentDateAndTime(false, false) then
 		DailyToDo:UpdateEntryPositionsOnChecklistFrame()
 	end
 	DailyToDo:UpdateEntryCompletedOnChecklistFrame()
@@ -247,12 +253,15 @@ function DailyToDo:UpdateForNewDateAndTime()
 end
 
 -- Resets completed quests given the current day and time
-function DailyToDo:CheckCurrentDateAndTime(firstTime)
+function DailyToDo:CheckCurrentDateAndTime(firstTime, reset)
 	-- Save current weekday
 	local oldDay = self.currentDay
 	local entriesChanged = false
 	self.currentDay = tonumber(date("%w")) + 1
 	local currentListReset = false
+	if reset then
+		currentListReset = true
+	end
 	local currentTime = tonumber(date("%Y%m%d%H%M%S"))
 
 	-- If first time starting application
@@ -264,14 +273,14 @@ function DailyToDo:CheckCurrentDateAndTime(firstTime)
 	local resetTime = tonumber(date("%Y%m%d")) * 1000000 + (self.db.profile.dailyResetTime - 1) * 10000
 
 	-- Check if we have completed quests for the current day on this character
-	if self.db.profile.timestamp <resetTime and (currentTime > resetTime or (currentTime - 1000000) > self.db.profile.timestamp) then
+	if (self.db.profile.timestamp <resetTime and (currentTime > resetTime or (currentTime - 1000000) > self.db.profile.timestamp)) or reset then
 		-- Has not been opened yet today, should reset completed quests
 		for listId, list in ipairs(self.db.profile.lists) do
 			for entryId, entry in ipairs(list.entries) do
 				if not entry.manual then
 					if not entry.weekly then
 						entry.completed = false
-						if not firstTime and self.checklistFrame.lists[listId] and self.checklistFrame.lists[listId].entries[entryId] and self.checklistFrame.lists[listId].entries[entryId].checkbox then
+						if (not firstTime and self.checklistFrame.lists[listId] and self.checklistFrame.lists[listId].entries[entryId] and self.checklistFrame.lists[listId].entries[entryId].checkbox) and not reset then
 							self.checklistFrame.lists[listId].entries[entryId].checkbox:SetChecked(false)
 						end
 							currentListReset = true
@@ -288,7 +297,7 @@ function DailyToDo:CheckCurrentDateAndTime(firstTime)
 			end
 			if currentListReset then
 				list.completed = false
-				if not firstTime and self.checklistFrame.lists[listId] and self.checklistFrame.lists[listId].checkbox then
+				if (not firstTime and self.checklistFrame.lists[listId] and self.checklistFrame.lists[listId].checkbox) or reset then
 					self.checklistFrame.lists[listId].checkbox:SetChecked(false)
 				end
 				currentListReset = false
@@ -299,7 +308,7 @@ function DailyToDo:CheckCurrentDateAndTime(firstTime)
 	end
 
 	-- Check if entries should be removed or added due to day change
-	if not firstTime and oldDay ~= self.currentDay then
+	if (not firstTime and oldDay ~= self.currentDay) or reset then
 		for listId, list in ipairs(self.db.profile.lists) do
 			for entryId, entry in ipairs(list.entries) do
 				if entry.days[oldDay] ~= entry.days[self.currentDay] then
@@ -659,14 +668,18 @@ function DailyToDo:UpdateEntryPositionsOnChecklistFrame()
 		end
 		if not self.db.profile.showListHeaders or self.db.profile.lists[listId].expanded then
 			for entryId, entry in pairs(list.entries) do
-				if entry and (self.db.profile.lists[listId].entries[entryId].checked and self.db.profile.lists[listId].expanded) and (not self.db.profile.lists[listId].entries[entryId].completed or not self.db.profile.hideCompleted) then
-					entry.checkbox:SetPoint("TOPLEFT", self.checklistFrame, "TOPLEFT", horizontalOffset, -offset + 1)
-					entry.checkbox.listId = listId
-					entry.checkbox.entryId = entryId
-					entry.checkbox:Show()
-					entry.headerText:SetPoint("TOPLEFT", self.checklistFrame, "TOPLEFT", horizontalOffset + 16, -offset)
-					entry.headerText:Show()
-					offset = offset + 16
+				if entry then
+					if listId and entryId then 
+						if (self.db.profile.lists[listId].entries[entryId].checked and self.db.profile.lists[listId].expanded) and (not self.db.profile.lists[listId].entries[entryId].completed or not self.db.profile.hideCompleted) then
+							entry.checkbox:SetPoint("TOPLEFT", self.checklistFrame, "TOPLEFT", horizontalOffset, -offset + 1)
+							entry.checkbox.listId = listId
+							entry.checkbox.entryId = entryId
+							entry.checkbox:Show()
+							entry.headerText:SetPoint("TOPLEFT", self.checklistFrame, "TOPLEFT", horizontalOffset + 16, -offset)
+							entry.headerText:Show()
+							offset = offset + 16
+						end
+					end
 				else
 					if entry.checkbox then
 						entry.checkbox:Hide()
