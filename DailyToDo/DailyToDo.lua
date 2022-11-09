@@ -192,6 +192,7 @@ function DailyToDo:HandleChatMessageCommands(msg)
 		self:Print("\"/todo options\" : opens options dialog")
 		self:Print("\"/todo profiles\" : opens profiles dialog")
 		self:Print("\"/todo manager\" : opens manager dialog")
+		self:Print("\"/todo reset\" : resets all weekly entries")
 	elseif command == "reset" then
 		self:ResetTimer()
 		self.db.profile.timestamp = nil
