@@ -1,7 +1,7 @@
 # DailtyToDoContinued
 An update to DailyToDo by Ærixalimar using fixes by Maaggel\
 \
-Originally based on DailyCheckList, this addon is now updated to work in Shadowlands.\
+Originally based on DailyCheckList, this addon is now updated to work in Dragonflight/Wrath/Classic.\
 \
 A lightweight addon that allows you to:\
 \
