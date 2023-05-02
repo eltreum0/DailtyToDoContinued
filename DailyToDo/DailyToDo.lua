@@ -283,6 +283,7 @@ function DailyToDo:CheckCurrentDateAndTime(firstTime, reset)
 						entry.completed = false
 						if (not firstTime and self.checklistFrame.lists[listId] and self.checklistFrame.lists[listId].entries[entryId] and self.checklistFrame.lists[listId].entries[entryId].checkbox) and not reset then
 							self.checklistFrame.lists[listId].entries[entryId].checkbox:SetChecked(false)
+							self:RefreshEverything()
 						end
 							currentListReset = true
 					else
@@ -290,6 +291,7 @@ function DailyToDo:CheckCurrentDateAndTime(firstTime, reset)
 							entry.completed = false
 							if not firstTime and self.checklistFrame.lists[listId] and self.checklistFrame.lists[listId].entries[entryId] and self.checklistFrame.lists[listId].entries[entryId].checkbox then
 								self.checklistFrame.lists[listId].entries[entryId].checkbox:SetChecked(false)
+								self:RefreshEverything()
 							end
 							currentListReset = true
 						end
@@ -801,7 +803,11 @@ function DailyToDo:CreateManagerFrame()
 	-- Create addon options frame
 	self.checklistManagerFrame = CreateFrame("Frame", "ChecklistManagerFrame", InterfaceOptionsFramePanelContainer)
 	self.checklistManagerFrame.name = "DailyToDo"
-	self.checklistManagerFrame:SetAllPoints(InterfaceOptionsFramePanelContainer)
+	if not isRetail then
+		self.checklistManagerFrame:SetAllPoints(InterfaceOptionsFramePanelContainer)
+	else
+		self.checklistManagerFrame:SetAllPoints(_G.SettingsPanel.Container)
+	end
 	self.checklistManagerFrame:Hide()
 	InterfaceOptions_AddCategory(self.checklistManagerFrame)
 
@@ -1272,8 +1278,12 @@ function DailyToDo:CreateManagerFrame()
 	-- Create scrollable frame
 	self.checklistManagerFrameScroll = CreateFrame("ScrollFrame", "checklistManagerFrameScroll", self.checklistManagerFrame, "FauxScrollFrameTemplate")
 	local sizeX, sizeY = self.checklistManagerFrame:GetSize()
-	self.checklistManagerFrameScroll:SetSize(sizeX, sizeY - self.managerPanelHeight )
-	self.checklistManagerFrameScroll:SetPoint("CENTER", -30, -95)
+	self.checklistManagerFrameScroll:SetSize(sizeX, self.managerPanelHeight)
+	if not isRetail then
+		self.checklistManagerFrameScroll:SetPoint("CENTER", -30, -95)
+	else
+		self.checklistManagerFrameScroll:SetPoint("RIGHT", -30, -95)
+	end
 	self.checklistManagerFrameScroll:SetScript("OnVerticalScroll", function(self, offset) FauxScrollFrame_OnVerticalScroll(self, offset, 20, function()
 		DailyToDo:UpdateEntriesForScrollFrame()
 		end)
