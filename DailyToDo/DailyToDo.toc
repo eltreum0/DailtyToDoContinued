@@ -1,6 +1,6 @@
 ## Interface: 100200
 ## Title: DailyToDo Continued
-## Version: 1.1.5
+## Version: 1.1.6
 ## IconTexture: Interface\RAIDFRAME\ReadyCheck-Ready
 ## Notes: Create Daily and Weekly ToDo lists!
 ## Author: Eltreum, originally Ærixalimar
