@@ -168,15 +168,12 @@ function DailyToDo:HandleChatMessageCommands(msg)
 	elseif command == "check" and text == "time" then
 		self:UpdateForNewDateAndTime()
 	elseif command == "options" then
-		InterfaceAddOnsList_Update()
 		InterfaceOptionsFrame_OpenToCategory(self.checklistOptionsFrame)
 		InterfaceOptionsFrame_OpenToCategory(self.checklistOptionsFrame)
 	elseif command == "manager" then
-		InterfaceAddOnsList_Update()
 		InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
 		InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
 	elseif command == "profiles" then
-		InterfaceAddOnsList_Update()
 		InterfaceOptionsFrame_OpenToCategory(self.checklistProfilesFrame)
 		InterfaceOptionsFrame_OpenToCategory(self.checklistProfilesFrame)
 	elseif command == "help" then
