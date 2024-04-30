@@ -1,6 +1,6 @@
 ## Interface: 11502
 ## Title: DailyToDo Continued
-## Version: 1.1.6
+## Version: 1.1.7
 ## Notes: Create Daily and Weekly ToDo lists!
 ## Author: Eltreum, originally Ærixalimar
 ## SavedVariables: DailyToDoDB
