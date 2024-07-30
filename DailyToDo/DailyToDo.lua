@@ -7,7 +7,7 @@ local isRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 local isTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local isWrath = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
-
+local isCata = WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
 
 -- Create empty table for localization data
 DailyToDo.localize = {}
@@ -61,12 +61,13 @@ DailyToDo.DailyToDoLDB = LibStub("LibDataBroker-1.1"):NewDataObject("DailyToDoDO
 		tt:AddLine("Left Click to toggle frame")
 		tt:AddLine("Right Click to open options, or type /todo")
 	end,
-	OnClick = function(self, button) 
-		DailyToDo:HandleIconClick(button) 
+	OnClick = function(self, button)
+		DailyToDo:HandleIconClick(button)
 	end,
 	})
 DailyToDo.icon = LibStub("LibDBIcon-1.0")
 LibDBIcon = LibStub("LibDBIcon-1.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 -- Set our database default values
 DailyToDo.defaults = {
@@ -168,14 +169,26 @@ function DailyToDo:HandleChatMessageCommands(msg)
 	elseif command == "check" and text == "time" then
 		self:UpdateForNewDateAndTime()
 	elseif command == "options" then
-		InterfaceOptionsFrame_OpenToCategory(self.checklistOptionsFrame)
-		InterfaceOptionsFrame_OpenToCategory(self.checklistOptionsFrame)
+		if InterfaceOptionsFrame_OpenToCategory then
+			InterfaceOptionsFrame_OpenToCategory(self.checklistOptionsFrame)
+			InterfaceOptionsFrame_OpenToCategory(self.checklistOptionsFrame)
+		else
+			_G.Settings.OpenToCategory(self.settingsCategory.ID) --there doesnt seem to be a way to call open on a subcategory
+		end
 	elseif command == "manager" then
-		InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
-		InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
+		if InterfaceOptionsFrame_OpenToCategory then
+			InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
+			InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
+		else
+			_G.Settings.OpenToCategory(self.settingsCategory.ID) --there doesnt seem to be a way to call open on a subcategory
+		end
 	elseif command == "profiles" then
-		InterfaceOptionsFrame_OpenToCategory(self.checklistProfilesFrame)
-		InterfaceOptionsFrame_OpenToCategory(self.checklistProfilesFrame)
+		if InterfaceOptionsFrame_OpenToCategory then
+			InterfaceOptionsFrame_OpenToCategory(self.checklistProfilesFrame)
+			InterfaceOptionsFrame_OpenToCategory(self.checklistProfilesFrame)
+		else
+			_G.Settings.OpenToCategory(self.settingsCategory.ID) --there doesnt seem to be a way to call open on a subcategory
+		end
 	elseif command == "help" then
 		self:Print("\"/todo show\" : shows checklist")
 		self:Print("\"/todo hide\" : hides checklist")
@@ -797,6 +810,212 @@ end
 
 -- Create the options frame under the WoW interface->addons menu
 function DailyToDo:CreateManagerFrame()
+	-- Create options frame
+	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(
+		"DailyToDo: Options", {
+	type = "group",
+	name = "Options",
+		args = {
+			general = {
+				type = "group",
+				inline = true,
+				name = "",
+				args = {
+					all = {
+						type = "group",
+						inline = true,
+						name = "Resets",
+						order = 10,
+						args = {
+						weeklyResetDayLabel = {
+							type = "description",
+							name = "Weekly reset day:",
+							order = 10
+						},
+						weeklyResetDay = {
+							type = "select",
+							name = "",
+							values = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"},
+							order = 20,
+							style = "dropdown",
+							get = getOpt,
+							set = function(info, value)
+								DailyToDo.db.profile.weeklyResetDay = value
+								DailyToDo:UpdateForNewDateAndTime()
+							end,
+						},
+						dailyResetTimeLabel = {
+							type = "description",
+							name = "Daily reset time (in local time):",
+							order = 30
+						},
+						dailyResetTime = {
+							type = "select",
+							name = "",
+							values = {"00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
+								"13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"},
+							order = 40,
+							width = "half",
+							get = getOpt,
+							set = function(info, value)
+								DailyToDo.db.profile.dailyResetTime = value
+								DailyToDo:UpdateForNewDateAndTime()
+							end,
+						},
+						resetPollIntervalLabel = {
+							type = "description",
+							name = "Interval for checking if entries should be reset due to new time or day",
+							order = 50,
+						},
+						resetPollInterval = {
+							type = "select",
+							name = "",
+							values = {"Never", "10 Minutes", "20 Minutes", "30 Minutes", "1 Hour"},
+							order = 60,
+							get = getOpt,
+							set = function(info, value)
+								DailyToDo.db.profile.resetPollInterval = value
+								DailyToDo:ResetTimer()
+							end,
+						},
+						checkTimeLabel = {
+							type = "description",
+							order = 70,
+							name = "Use this to manually check if entries should be reset"
+						},
+						checkTime = {
+							type = "execute",
+							order = 80,
+							name = "Check Time",
+							func = function()
+								DailyToDo:UpdateForNewDateAndTime()
+							end,
+						}
+						},
+					},
+					frames = {
+						type = "group",
+						inline = true,
+						name = "Checklist Frame Options",
+						order = 20,
+						args = {
+						locked = {
+							type = "toggle",
+							name = "Lock Frame",
+							order = 10,
+							get = getOpt,
+							set = setOpt,
+						},
+						hidden = {
+							type = "toggle",
+							name = "Hide Frame",
+							order = 20,
+							get = function(info) return DailyToDo.db.profile.framePosition.hidden end,
+							set = function(info, value)
+								DailyToDo.db.profile.framePosition.hidden = value
+								DailyToDo:UpdateVisibilityForChecklistFrame()
+							end,
+						},
+						showListHeaders = {
+							type = "toggle",
+							name = "Show list headers",
+							order = 30,
+							get = getOpt,
+							set = function(info, value)
+								DailyToDo.db.profile.showListHeaders = value
+								if value then
+							 for listId, _ in pairs(DailyToDo.db.profile.lists) do
+								 DailyToDo:UpdateListOnChecklistFrame(listId)
+							 end
+								else
+							 for listId, _ in pairs(DailyToDo.db.profile.lists) do
+								 DailyToDo:RemoveListHeaderFromChecklistFrame(listId)
+							 end
+								end
+								-- Update positions because of visibility change
+								DailyToDo:UpdateEntryPositionsOnChecklistFrame()
+							end,
+						},
+						hideCompleted = {
+							type = "toggle",
+							name = "Hide Completed",
+							order = 40,
+							get = getOpt,
+							set = function(info, value)
+								DailyToDo.db.profile.hideCompleted = value
+								DailyToDo:UpdateVisibilityOnChecklistFrame(value)
+								DailyToDo:UpdateEntryPositionsOnChecklistFrame()
+							end,
+						},
+						hideObjectives = {
+							type = "toggle",
+							name = "Hide Objectives Frame",
+							order = 50,
+							get = getOpt,
+							set = setOpt,
+						},
+						},
+					},
+					minimap = {
+						type = "group",
+						inline = true,
+						name = "Minimap Icon",
+						order = 30,
+						args = {
+						iconLabel = {
+							type = "description",
+							name = "Requires UI restart to take effect",
+							order = 10
+						},
+						icon = {
+							type = "toggle",
+							name = "Hide Minimap Icon",
+							order = 20,
+							get = function(info) return DailyToDo.db.profile.icon.hide end,
+							set = function(info, value)
+								DailyToDo.db.profile.icon.hide = value
+							end,
+						}
+						},
+					},
+					utilities = {
+						type = "group",
+						inline = true,
+						name = "Utilities",
+						order = 40,
+						args = {
+						resetLabel = {
+							type = "description",
+							name = "Requires UI restart to take effect",
+							order = 10
+						},
+						resetPosition = {
+							type = "execute",
+							order = 20,
+							name = "Reset Position",
+							func = function()
+								DailyToDo.db.profile.framePosition = DailyToDo.defaults.profile.framePosition
+								DailyToDo.checklistFrame:SetPoint(DailyToDo.db.profile.framePosition.anchor, nil, DailyToDo.db.profile.framePosition.anchor, DailyToDo.db.profile.framePosition.x, DailyToDo.db.profile.framePosition.y-16)
+							end,
+						},
+						memoryLabel = {
+							type = "description",
+							name = "Use this when you have significantly changed the daily checklist to free up memory",
+							order = 30,
+						},
+						memory = {
+							type = "execute",
+							order = 40,
+							name = "Clear Trash",
+							func = function() collectgarbage("collect") end,
+						}
+						}
+					}
+				},
+			},
+		},
+	})
+
 	-- Create addon options frame
 	self.checklistManagerFrame = CreateFrame("Frame", "ChecklistManagerFrame", InterfaceOptionsFramePanelContainer)
 	self.checklistManagerFrame.name = "DailyToDo"
@@ -806,12 +1025,21 @@ function DailyToDo:CreateManagerFrame()
 		self.checklistManagerFrame:SetAllPoints(_G.SettingsPanel.Container)
 	end
 	self.checklistManagerFrame:Hide()
-	InterfaceOptions_AddCategory(self.checklistManagerFrame)
+	if InterfaceOptions_AddCategory then
+		InterfaceOptions_AddCategory(self.checklistManagerFrame)
+	else
+		self.settingsCategory = _G.Settings.RegisterCanvasLayoutCategory(self.checklistManagerFrame, self.checklistManagerFrame.name)
+		_G.Settings.RegisterAddOnCategory(self.settingsCategory)
+	end
 
 	-- Create addon profiles options frame
 	self.checklistProfilesOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("DailyToDo: "..self.checklistProfilesOptions.name, self.checklistProfilesOptions)
-	self.checklistProfilesFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("DailyToDo: "..self.checklistProfilesOptions.name, self.checklistProfilesOptions.name, "DailyToDo")
+	if InterfaceOptions_AddCategory then
+		self.checklistProfilesFrame = AceConfigDialog:AddToBlizOptions("DailyToDo: "..self.checklistProfilesOptions.name, self.checklistProfilesOptions.name, "DailyToDo")
+	else
+		self.checklistProfilesFrame = AceConfigDialog:AddToBlizOptions("DailyToDo: "..self.checklistProfilesOptions.name, self.checklistProfilesOptions.name, self.settingsCategory.ID)
+	end
 
 	local function getOpt(info)
 		return DailyToDo.db.profile[info[#info]]
@@ -822,212 +1050,11 @@ function DailyToDo:CreateManagerFrame()
 		return DailyToDo.db.profile[info[#info]]
 	end
 
-	-- Create options frame
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(
-		"DailyToDo: Options", {
-	type = "group",
-	name = "Options",
-	args = {
-		general = {
-			type = "group",
-			inline = true,
-			name = "",
-			args = {
-				all = {
-					type = "group",
-					inline = true,
-					name = "Resets",
-					order = 10,
-					args = {
-					weeklyResetDayLabel = {
-						type = "description",
-						name = "Weekly reset day:",
-						order = 10
-					},
-					weeklyResetDay = {
-						type = "select",
-						name = "",
-						values = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"},
-						order = 20,
-						style = "dropdown",
-						get = getOpt,
-						set = function(info, value)
-							DailyToDo.db.profile.weeklyResetDay = value
-							DailyToDo:UpdateForNewDateAndTime()
-						end,
-					},
-					dailyResetTimeLabel = {
-						type = "description",
-						name = "Daily reset time (in local time):",
-						order = 30
-					},
-					dailyResetTime = {
-						type = "select",
-						name = "",
-						values = {"00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
-							"13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"},
-						order = 40,
-						width = "half",
-						get = getOpt,
-						set = function(info, value)
-							DailyToDo.db.profile.dailyResetTime = value
-							DailyToDo:UpdateForNewDateAndTime()
-						end,
-					},
-					resetPollIntervalLabel = {
-						type = "description",
-						name = "Interval for checking if entries should be reset due to new time or day",
-						order = 50,
-					},
-					resetPollInterval = {
-						type = "select",
-						name = "",
-						values = {"Never", "10 Minutes", "20 Minutes", "30 Minutes", "1 Hour"},
-						order = 60,
-						get = getOpt,
-						set = function(info, value)
-							DailyToDo.db.profile.resetPollInterval = value
-							DailyToDo:ResetTimer()
-						end,
-					},
-					checkTimeLabel = {
-						type = "description",
-						order = 70,
-						name = "Use this to manually check if entries should be reset"
-					},
-					checkTime = {
-						type = "execute",
-						order = 80,
-						name = "Check Time",
-						func = function()
-							DailyToDo:UpdateForNewDateAndTime()
-						end,
-					}
-					},
-				},
-				frames = {
-					type = "group",
-					inline = true,
-					name = "Checklist Frame Options",
-					order = 20,
-					args = {
-					locked = {
-						type = "toggle",
-						name = "Lock Frame",
-						order = 10,
-						get = getOpt,
-						set = setOpt,
-					},
-					hidden = {
-						type = "toggle",
-						name = "Hide Frame",
-						order = 20,
-						get = function(info) return DailyToDo.db.profile.framePosition.hidden end,
-						set = function(info, value)
-							DailyToDo.db.profile.framePosition.hidden = value
-							DailyToDo:UpdateVisibilityForChecklistFrame()
-						end,
-					},
-					showListHeaders = {
-						type = "toggle",
-						name = "Show list headers",
-						order = 30,
-						get = getOpt,
-						set = function(info, value)
-							DailyToDo.db.profile.showListHeaders = value
-							if value then
-						 for listId, _ in pairs(DailyToDo.db.profile.lists) do
-							 DailyToDo:UpdateListOnChecklistFrame(listId)
-						 end
-							else
-						 for listId, _ in pairs(DailyToDo.db.profile.lists) do
-							 DailyToDo:RemoveListHeaderFromChecklistFrame(listId)
-						 end
-							end
-							-- Update positions because of visibility change
-							DailyToDo:UpdateEntryPositionsOnChecklistFrame()
-						end,
-					},
-					hideCompleted = {
-						type = "toggle",
-						name = "Hide Completed",
-						order = 40,
-						get = getOpt,
-						set = function(info, value)
-							DailyToDo.db.profile.hideCompleted = value
-							DailyToDo:UpdateVisibilityOnChecklistFrame(value)
-							DailyToDo:UpdateEntryPositionsOnChecklistFrame()
-						end,
-					},
-					hideObjectives = {
-						type = "toggle",
-						name = "Hide Objectives Frame",
-						order = 50,
-						get = getOpt,
-						set = setOpt,
-					},
-					},
-				},
-				minimap = {
-					type = "group",
-					inline = true,
-					name = "Minimap Icon",
-					order = 30,
-					args = {
-					iconLabel = {
-						type = "description",
-						name = "Requires UI restart to take effect",
-						order = 10
-					},
-					icon = {
-						type = "toggle",
-						name = "Hide Minimap Icon",
-						order = 20,
-						get = function(info) return DailyToDo.db.profile.icon.hide end,
-						set = function(info, value)
-							DailyToDo.db.profile.icon.hide = value
-						end,
-					}
-					},
-				},
-				utilities = {
-					type = "group",
-					inline = true,
-					name = "Utilities",
-					order = 40,
-					args = {
-					resetLabel = {
-						type = "description",
-						name = "Requires UI restart to take effect",
-						order = 10
-					},
-					resetPosition = {
-						type = "execute",
-						order = 20,
-						name = "Reset Position",
-						func = function()
-							DailyToDo.db.profile.framePosition = DailyToDo.defaults.profile.framePosition
-							DailyToDo.checklistFrame:SetPoint(DailyToDo.db.profile.framePosition.anchor, nil, DailyToDo.db.profile.framePosition.anchor, DailyToDo.db.profile.framePosition.x, DailyToDo.db.profile.framePosition.y-16)
-						end,
-					},
-					memoryLabel = {
-						type = "description",
-						name = "Use this when you have significantly changed the daily checklist to free up memory",
-						order = 30,
-					},
-					memory = {
-						type = "execute",
-						order = 40,
-						name = "Clear Trash",
-						func = function() collectgarbage("collect") end,
-					}
-					}
-				}
-			},
-		},
-	},
-							})
-	self.checklistOptionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("DailyToDo: Options", "Options", "DailyToDo")
+	if InterfaceOptions_AddCategory then
+		self.checklistOptionsFrame = AceConfigDialog:AddToBlizOptions("DailyToDo: Options", "Options", "DailyToDo")
+	else
+		self.checklistOptionsFrame = AceConfigDialog:AddToBlizOptions("DailyToDo: Options", "Options", self.settingsCategory.ID)
+	end
 
 	local checklistManagerListLabel = self.checklistManagerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	checklistManagerListLabel:SetPoint("TOPLEFT", 10, -10)
@@ -1036,14 +1063,12 @@ function DailyToDo:CreateManagerFrame()
 	checklistManagerListLabel:SetHeight(12)
 	checklistManagerListLabel:SetText("DailyToDo Continued")
 
-
 	local checklistManagerListLabel = self.checklistManagerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	checklistManagerListLabel:SetPoint("TOPLEFT", 10, -30)
 	checklistManagerListLabel:SetPoint("TOPRIGHT", 0, -30)
 	checklistManagerListLabel:SetJustifyH("CENTER")
 	checklistManagerListLabel:SetHeight(12)
 	checklistManagerListLabel:SetText("Originally made by Ærixalimar, continued by Eltreum using fixes by Maaggel")
-
 
 	local checklistManagerListLabel = self.checklistManagerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 	checklistManagerListLabel:SetPoint("TOPLEFT", 10, -50)
@@ -1857,8 +1882,12 @@ function DailyToDo:HandleIconClick(button)
 		DailyToDo:UpdateVisibilityForChecklistFrame()
 	elseif button == "RightButton" then
 		-- Open options menu in interface->addon menu
-		InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
-		InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
+		if InterfaceOptionsFrame_OpenToCategory then
+			InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
+			InterfaceOptionsFrame_OpenToCategory(self.checklistManagerFrame)
+		else
+			_G.Settings.OpenToCategory(self.settingsCategory.ID)
+		end
 	end
 end
 
