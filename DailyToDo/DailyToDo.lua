@@ -226,7 +226,7 @@ function DailyToDo:OnEnable()
 	self:ResetTimer()
 
 	-- Initialize number of entries that will fit in interface options panel
-	if not isRetail then
+	if isCata then
 		self.maxEntries = math.floor((InterfaceOptionsFramePanelContainer:GetHeight() - self.managerPanelHeight) / 25)
 	else
 		self.maxEntries = 10
@@ -1019,7 +1019,7 @@ function DailyToDo:CreateManagerFrame()
 	-- Create addon options frame
 	self.checklistManagerFrame = CreateFrame("Frame", "ChecklistManagerFrame", InterfaceOptionsFramePanelContainer)
 	self.checklistManagerFrame.name = "DailyToDo"
-	if not isRetail then
+	if isCata then
 		self.checklistManagerFrame:SetAllPoints(InterfaceOptionsFramePanelContainer)
 	else
 		self.checklistManagerFrame:SetAllPoints(_G.SettingsPanel.Container)
@@ -1301,7 +1301,7 @@ function DailyToDo:CreateManagerFrame()
 	self.checklistManagerFrameScroll = CreateFrame("ScrollFrame", "checklistManagerFrameScroll", self.checklistManagerFrame, "FauxScrollFrameTemplate")
 	local sizeX, sizeY = self.checklistManagerFrame:GetSize()
 	self.checklistManagerFrameScroll:SetSize(sizeX, self.managerPanelHeight)
-	if not isRetail then
+	if isCata then
 		self.checklistManagerFrameScroll:SetPoint("CENTER", -30, -95)
 	else
 		self.checklistManagerFrameScroll:SetPoint("RIGHT", -30, -95)
