@@ -1,10 +1,12 @@
-## Interface: 110000
+## Interface: 110002
 ## Title: DailyToDo Continued
-## Version: 1.1.8
+## Version: 1.1.9
 ## IconTexture: Interface\RAIDFRAME\ReadyCheck-Ready
 ## Notes: Create Daily and Weekly ToDo lists!
 ## Author: Eltreum, originally Ærixalimar
 ## SavedVariables: DailyToDoDB
+## X-Curse-Project-ID: 435628
+## X-Wago-ID: Xb6XoPNp
 
 embeds.xml
 DailyToDo.lua
