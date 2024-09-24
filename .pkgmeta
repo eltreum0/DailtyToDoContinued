@@ -1,0 +1,20 @@
+package-as: DailyToDo
+
+enable-nolib-creation: no
+
+ignore:
+  - DailtyToDoContinued/.git
+  - DailtyToDoContinued/.github
+  - .pkgmeta
+  - DailtyToDoContinued/Changelog.md
+  - DailtyToDoContinued/License.md
+  - DailtyToDoContinued/README.md
+  - "*.md"
+  - .luacheckrc
+
+move-folders:
+    DailtyToDoContinued/DailyToDo: DailyToDo
+
+manual-changelog:
+  filename: Changelog.md
+  markup-type: markdown
