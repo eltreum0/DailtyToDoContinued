@@ -13,7 +13,7 @@ ignore:
   - .luacheckrc
 
 move-folders:
-    DailyToDoContinued/DailyToDo: DailyToDo
+    DailyToDoContinued/DailyToDo: DailyToDoContinued
 
 manual-changelog:
   filename: Changelog.md
