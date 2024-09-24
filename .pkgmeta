@@ -3,17 +3,17 @@ package-as: DailyToDo
 enable-nolib-creation: no
 
 ignore:
-  - DailyToDoContinued/.git
-  - DailyToDoContinued/.github
+  - DailtyToDoContinued/.git
+  - DailtyToDoContinued/.github
   - .pkgmeta
-  - DailyToDoContinued/Changelog.md
-  - DailyToDoContinued/License.md
-  - DailyToDoContinued/README.md
+  - DailtyToDoContinued/Changelog.md
+  - DailtyToDoContinued/License.md
+  - DailtyToDoContinued/README.md
   - "*.md"
   - .luacheckrc
 
 move-folders:
-    DailyToDoContinued/DailyToDo: DailyToDo
+    DailtyToDoContinued/DailyToDo: DailyToDo
 
 manual-changelog:
   filename: Changelog.md
