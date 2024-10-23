@@ -1,3 +1,3 @@
-### 1.1.9
+### 1.2.0
 
-Updated for Classic Era 1.15.4
+Updated for 11.0.5
